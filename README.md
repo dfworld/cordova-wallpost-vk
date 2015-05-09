@@ -1,0 +1,1 @@
+# cordova-wallpost-vk
