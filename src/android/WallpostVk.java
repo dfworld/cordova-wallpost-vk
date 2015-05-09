@@ -182,7 +182,7 @@ public class WallpostVk extends CordovaPlugin {
 		VKApi.friends().get(VKParameters.from(VKApiConst.FIELDS, "first_name, last_name, sex, bdate, city, country, home_town, photo_50, photo_100, photo_200, online, domain, site, education, universities, schools, followers_count, occupation, relatives, relation, personal, activities, interests")).executeWithListener(new VKRequest.VKRequestListener() {
 			@Override
 			public void onComplete(VKResponse response) {
-/				super.onComplete(response); 
+//				super.onComplete(response); 
 				_callbackContext.success(response.json);
 			}
 		});
