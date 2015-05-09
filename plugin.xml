@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin
+    xmlns="http://apache.org/cordova/ns/plugins/1.0"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    id="ru.advrocket.cordova-wallpost-vk"
+    version="1.0.0">
+
+  <name>WallpostVk</name>
+  <description>Cordova plugin for VKontakte wall posting</description>
+  <engines>
+    <engine name="cordova" version=">=3.0.0" />
+  </engines>
+  
+  <license>Apache 2.0 License</license>
+  <author>Dfworld</author>
+  <keywords>cordova,phonegap,vkontakte,wall,posting</keywords>
+  <js-module src="www/wallpost-vk.js" name="WallpostVk">
+    <clobbers target="WallpostVk" />
+  </js-module>
+  <!-- ios -->
+  <platform name="ios">
+    <preference name="VK_APP_ID" />
+    <info>
+      You need to register VKontakte application first.
+    </info>
+    <config-file target="config.xml" parent="/*">
+      <feature name="WallpostVk">
+        <param name="ios-package" value="WallpostVk"/>
+      </feature>
+    </config-file>
+
+    <header-file src="src/ios/WallpostVk.h"/>
+    <source-file src="src/ios/WallpostVk.m" />
+    <framework src="src/ios/VKontakte.framework" custom="true"/>
+    <resource-file src="src/ios/VKSdkResources.bundle" />
+
+    <config-file target="*-Info.plist" parent="CFBundleURLTypes">
+      <array>
+        <dict>
+          <key>CFBundleTypeRole</key>
+          <string>Editor</string>
+          <key>CFBundleURLName</key>
+          <string>$VK_APP_ID</string>
+          <key>CFBundleURLSchemes</key>
+          <array>
+            <string>$VK_APP_ID</string>
+          </array>
+        </dict>
+      </array>
+    </config-file>
+  </platform>
+
+  <!-- android -->
+  <platform name="android">
+    <info>
+      You should add 'android.library.reference.2=vksdk_library' to project.properties
+    </info>
+    <!-- Cordova 2.5+ -->
+    <config-file target="config.xml" parent="/*">
+      <feature name="WallpostVk">
+        <param name="android-package" value="ru.advrocket.wallpostvk.WallpostVk"/>
+      </feature>
+    </config-file>
+    <config-file target="AndroidManifest.xml" parent="/manifest/application">
+      <activity android:name="com.vk.sdk.VKOpenAuthActivity" >
+      </activity>
+    </config-file>
+
+    <source-file src="src/android/vksdk_library" target-dir="./" />
+    <source-file src="src/android/WallpostVk.java" target-dir="src/ru/advrocket/wallpostvk/" />
+  </platform>
+
+</plugin>
