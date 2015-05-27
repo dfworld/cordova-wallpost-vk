@@ -1,6 +1,7 @@
 package ru.advrocket.wallpostvk;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaArgs;
@@ -47,8 +48,10 @@ public class WallpostVk extends CordovaPlugin {
 	private static final String TAG = "WallpostVk";
 	private static final String ACTION_INIT = "initWallpostVk";
 	private static final String ACTION_SHARE = "share";
+	private static final String ACTION_LOGIN = "login";
 	private static final String ACTION_FRIENDS = "getFriends";
 	private static final String ACTION_POSTWALL = "postWall";
+	private static final String ACTION_STATUS = "getStatus";
 	private CallbackContext _callbackContext;
 
 	private String savedUrl = null;
@@ -77,8 +80,12 @@ public class WallpostVk extends CordovaPlugin {
 			return shareOrLogin(args.getString(0), args.getString(1), args.getString(2));
 		} else if (ACTION_FRIENDS.equals(action)) {
 			return getFriends();
+		} else if (ACTION_STATUS.equals(action)) {
+			return getStatus();
+		} else if (ACTION_LOGIN.equals(action)) {
+			return login();
 		} else if (ACTION_POSTWALL.equals(action)) {
-			return postWall(args.getString(0), args.getString(1), args.getString(2));
+			return postWall(args.getString(0), args.getString(1), args.getString(2), args.getString(3));
 		} else {
 			Log.i(TAG, "Unknown action: "+action);
 		}
@@ -127,23 +134,26 @@ public class WallpostVk extends CordovaPlugin {
 			public void onReceiveNewToken(VKAccessToken newToken) {
 				Log.i(TAG, "VK new token: "+newToken.accessToken);
 				newToken.saveTokenToSharedPreferences(webView.getContext(), sTokenKey);
-				success();
-				share(savedUrl, savedComment, savedImageUrl);
+				//success();
+				//share(savedUrl, savedComment, savedImageUrl);
+				getStatus();
 			}
 			
 			@Override
 			public void onAcceptUserToken(VKAccessToken token) {
 				Log.i(TAG, "VK accept token: "+token.accessToken);
-				success();
-				share(savedUrl, savedComment, savedImageUrl);
+				//success();
+				//share(savedUrl, savedComment, savedImageUrl);
+				getStatus();
 			}
 			
 			@Override
 			public void onRenewAccessToken(VKAccessToken newToken) {
 				Log.i(TAG, "VK Renew token: "+newToken.accessToken);
 				newToken.saveTokenToSharedPreferences(webView.getContext(), sTokenKey);
-				success();
-				share(savedUrl, savedComment, savedImageUrl);
+				//success();
+				//share(savedUrl, savedComment, savedImageUrl);
+				getStatus();
 			}
 		};
 		
@@ -179,7 +189,7 @@ public class WallpostVk extends CordovaPlugin {
 		if(!VKSdk.isLoggedIn()) {
 			VKSdk.authorize(scope, false, true);
 		} else {
-		VKApi.friends().get(VKParameters.from(VKApiConst.FIELDS, "first_name, last_name, sex, bdate, city, country, home_town, photo_50, photo_100, photo_200, online, domain, site, education, universities, schools, followers_count, occupation, relatives, relation, personal, activities, interests")).executeWithListener(new VKRequest.VKRequestListener() {
+		VKApi.friends().get(VKParameters.from(VKApiConst.FIELDS, "first_name, last_name, sex, bdate, city, country, home_town, photo_50, photo_100, photo_200, online, domain, site, education, universities, schools, followers_count, occupation, relatives, relation, personal, activities, interests,can_post")).executeWithListener(new VKRequest.VKRequestListener() {
 			@Override
 			public void onComplete(VKResponse response) {
 //				super.onComplete(response); 
@@ -191,25 +201,95 @@ public class WallpostVk extends CordovaPlugin {
 		return true;
 	}
 
+	private boolean getStatus(){
+		this.cordova.setActivityResultCallback(this);
+		final String[] scope = new String[]{VKScope.WALL, VKScope.FRIENDS};
+		if(!VKSdk.isLoggedIn()) {
+			Log.i(TAG, "getStatus: False");
+			try{ 
+				statusReturn(new Boolean(false));
+			}catch (JSONException e) {}
+		} else {
+			VKUIHelper.setApplicationContext(getApplicationContext());
 
-	private boolean postWall(final String friendId, final String url, final String comment){
+			Log.i(TAG, "getStatus: true");
+			VKRequest request = VKApi.users().get(VKParameters.from(VKApiConst.FIELDS, "first_name, last_name, sex, bdate, city, country, home_town, photo_50, photo_100, photo_200"));
+			request.executeWithListener(new VKRequest.VKRequestListener() {
+				@Override
+				public void onComplete(VKResponse response) { 
+					Log.i(TAG, "getStatus: onComplete");
+					super.onComplete(response); 
+					try{ 
+						statusReturn(new Boolean(true), response.json);
+					}catch (JSONException e) {}
+				}
+				@Override 
+				public void onError(VKError error) {
+					Log.i(TAG, "getStatus: onError"); 
+					_callbackContext.error("Error");
+				} 
+			});
+		}
+
+		return true;
+	}
+
+	private boolean statusReturn(final Boolean status) throws JSONException{
+		try{
+			final JSONObject resultJson = new JSONObject();
+			resultJson.put("login", status);
+			_callbackContext.success(resultJson);
+		}catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return true;
+	}
+	
+	private boolean statusReturn(final Boolean status,  JSONObject data) throws JSONException {
+		try{
+			final JSONObject resultJson = new JSONObject();
+			resultJson.put("login", status);
+			resultJson.put("member", data);
+			_callbackContext.success(resultJson);
+		}catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return true;
+	}
+	
+	private boolean login(){
+		this.cordova.setActivityResultCallback(this);
+		final String[] scope = new String[]{VKScope.WALL, VKScope.FRIENDS};
+		//if(!VKSdk.isLoggedIn()) {
+			VKSdk.authorize(scope, false, true);
+		//} else {
+		//	getStatus();
+		//}
+		return true;
+	}
+	
+	//friendID, sourceURL, title, description, imgId
+	private boolean postWall(final String friendId, final String url, final String comment, final String imgid){
 		this.cordova.setActivityResultCallback(this);
 		final String[] scope = new String[]{VKScope.WALL, VKScope.FRIENDS};
 		if(!VKSdk.isLoggedIn()) {
 			VKSdk.authorize(scope, false, true);
 		} else {
-		VKApi.wall().post(VKParameters.from(VKApiConst.OWNER_ID, friendId, VKApiConst.MESSAGE, comment, VKApiConst.ATTACHMENTS, url)).executeWithListener(new VKRequest.VKRequestListener() {
-			@Override 
-			public void onComplete(VKResponse response) { 
-//				super.onComplete(response); 
-				_callbackContext.success(response.json);
-//				Log.d("Result", response.responseString);
-			} 
-			@Override 
-			public void onError(VKError error) { 
-				Log.d("Errror COde", error.errorMessage);
-			} 
-		});
+			final String attachmts = (imgid != "") ? (imgid + "," + url) : url;
+
+			VKApi.wall().post(VKParameters.from(VKApiConst.OWNER_ID, friendId, VKApiConst.MESSAGE, comment, VKApiConst.ATTACHMENTS, attachmts)).executeWithListener(new VKRequest.VKRequestListener() {
+				@Override 
+				public void onComplete(VKResponse response) { 
+	//				super.onComplete(response); 
+					_callbackContext.success(response.json);
+	//				Log.d("Result", response.responseString);
+				} 
+				@Override 
+				public void onError(VKError error) { 
+					Log.d("Errror COde", error.errorMessage);
+					_callbackContext.error("Error");
+				} 
+			});
 		}
 
 		return true;
