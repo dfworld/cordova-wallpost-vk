@@ -128,4 +128,9 @@ public class VKUIHelper {
 
         return output;
     }
+    static public void setApplicationContext(Context appContext) {
+        if (appContext != null) {
+            sApplicationContext = appContext;
+        }
+    }
 }
