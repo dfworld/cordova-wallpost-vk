@@ -161,7 +161,16 @@ public class WallpostVk extends CordovaPlugin {
 		Log.i(TAG, sTokenKey);
 		Log.i(TAG, appId);
 
-		VKSdk.initialize(sdkListener, appId, VKAccessToken.tokenFromSharedPreferences(webView.getContext(), sTokenKey));
+		VKAccessToken token = VKAccessToken.tokenFromSharedPreferences(webView.getContext(), sTokenKey);
+		if(token != null){
+//			Log.i(TAG, "Token != null");
+			VKSdk.initialize(sdkListener, appId, token);
+		}else{
+//			Log.i(TAG, "Token == null");
+			VKSdk.initialize(sdkListener, appId);
+			_callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR));
+			_callbackContext.error("Error");
+		}
 		VKUIHelper.onCreate(getActivity());
 
 		return true;
