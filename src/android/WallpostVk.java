@@ -57,6 +57,7 @@ public class WallpostVk extends CordovaPlugin {
 	private String savedUrl = null;
 	private String savedComment = null;
 	private String savedImageUrl = null;
+	private String statusEmail = null;
 
 	/**
 	 * Gets the application context from cordova's main activity.
@@ -134,6 +135,7 @@ public class WallpostVk extends CordovaPlugin {
 			public void onReceiveNewToken(VKAccessToken newToken) {
 				Log.i(TAG, "VK new token: "+newToken.accessToken);
 				newToken.saveTokenToSharedPreferences(webView.getContext(), sTokenKey);
+				statusEmail = newToken.email;
 				//success();
 				//share(savedUrl, savedComment, savedImageUrl);
 				getStatus();
@@ -142,6 +144,7 @@ public class WallpostVk extends CordovaPlugin {
 			@Override
 			public void onAcceptUserToken(VKAccessToken token) {
 				Log.i(TAG, "VK accept token: "+token.accessToken);
+				statusEmail = token.email;
 				//success();
 				//share(savedUrl, savedComment, savedImageUrl);
 				getStatus();
@@ -151,6 +154,7 @@ public class WallpostVk extends CordovaPlugin {
 			public void onRenewAccessToken(VKAccessToken newToken) {
 				Log.i(TAG, "VK Renew token: "+newToken.accessToken);
 				newToken.saveTokenToSharedPreferences(webView.getContext(), sTokenKey);
+				statusEmail = newToken.email;
 				//success();
 				//share(savedUrl, savedComment, savedImageUrl);
 				getStatus();
@@ -161,16 +165,7 @@ public class WallpostVk extends CordovaPlugin {
 		Log.i(TAG, sTokenKey);
 		Log.i(TAG, appId);
 
-		VKAccessToken token = VKAccessToken.tokenFromSharedPreferences(webView.getContext(), sTokenKey);
-		if(token != null){
-//			Log.i(TAG, "Token != null");
-			VKSdk.initialize(sdkListener, appId, token);
-		}else{
-//			Log.i(TAG, "Token == null");
-			VKSdk.initialize(sdkListener, appId);
-			_callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR));
-			_callbackContext.error("Error");
-		}
+		VKSdk.initialize(sdkListener, appId, VKAccessToken.tokenFromSharedPreferences(webView.getContext(), sTokenKey));
 		VKUIHelper.onCreate(getActivity());
 
 		return true;
@@ -179,7 +174,7 @@ public class WallpostVk extends CordovaPlugin {
 	private boolean shareOrLogin(final String url, final String comment, final String imageUrl)
 	{
 	 this.cordova.setActivityResultCallback(this);
-		final String[] scope = new String[]{VKScope.WALL, VKScope.FRIENDS};
+		final String[] scope = new String[]{VKScope.WALL, VKScope.FRIENDS, "email"};
 		if(!VKSdk.isLoggedIn()) {
 			savedUrl = url;
 			savedComment = comment;
@@ -194,7 +189,7 @@ public class WallpostVk extends CordovaPlugin {
 	private boolean getFriends()
 	{
 		this.cordova.setActivityResultCallback(this);
-		final String[] scope = new String[]{VKScope.WALL, VKScope.FRIENDS};
+		final String[] scope = new String[]{VKScope.WALL, VKScope.FRIENDS, "email"};
 		if(!VKSdk.isLoggedIn()) {
 			VKSdk.authorize(scope, false, true);
 		} else {
@@ -212,7 +207,7 @@ public class WallpostVk extends CordovaPlugin {
 
 	private boolean getStatus(){
 		this.cordova.setActivityResultCallback(this);
-		final String[] scope = new String[]{VKScope.WALL, VKScope.FRIENDS};
+		final String[] scope = new String[]{VKScope.WALL, VKScope.FRIENDS, "email"};
 		if(!VKSdk.isLoggedIn()) {
 			Log.i(TAG, "getStatus: False");
 			try{ 
@@ -247,6 +242,7 @@ public class WallpostVk extends CordovaPlugin {
 		try{
 			final JSONObject resultJson = new JSONObject();
 			resultJson.put("login", status);
+			resultJson.put("email", statusEmail);
 			_callbackContext.success(resultJson);
 		}catch (JSONException e) {
 			e.printStackTrace();
@@ -259,6 +255,7 @@ public class WallpostVk extends CordovaPlugin {
 			final JSONObject resultJson = new JSONObject();
 			resultJson.put("login", status);
 			resultJson.put("member", data);
+			resultJson.put("email", statusEmail);
 			_callbackContext.success(resultJson);
 		}catch (JSONException e) {
 			e.printStackTrace();
@@ -268,7 +265,7 @@ public class WallpostVk extends CordovaPlugin {
 	
 	private boolean login(){
 		this.cordova.setActivityResultCallback(this);
-		final String[] scope = new String[]{VKScope.WALL, VKScope.FRIENDS};
+		final String[] scope = new String[]{VKScope.WALL, VKScope.FRIENDS, "email"};
 		//if(!VKSdk.isLoggedIn()) {
 			VKSdk.authorize(scope, false, true);
 		//} else {
@@ -280,7 +277,7 @@ public class WallpostVk extends CordovaPlugin {
 	//friendID, sourceURL, title, description, imgId
 	private boolean postWall(final String friendId, final String url, final String comment, final String imgid){
 		this.cordova.setActivityResultCallback(this);
-		final String[] scope = new String[]{VKScope.WALL, VKScope.FRIENDS};
+		final String[] scope = new String[]{VKScope.WALL, VKScope.FRIENDS, "email"};
 		if(!VKSdk.isLoggedIn()) {
 			VKSdk.authorize(scope, false, true);
 		} else {

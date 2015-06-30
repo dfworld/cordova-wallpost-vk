@@ -23,6 +23,7 @@ package com.vk.sdk;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.preference.PreferenceManager;
 
 import com.vk.sdk.api.VKParameters;
@@ -42,6 +43,7 @@ public class VKAccessToken {
     public static final String HTTPS_REQUIRED = "https_required";
     public static final String CREATED = "created";
     public static final String SUCCESS = "success";
+	public static final String EMAIL = "email";
 
     /**
      * String token for use in request parameters
@@ -68,6 +70,11 @@ public class VKAccessToken {
      * Indicates time of token creation
      */
     public long created = 0;
+    
+	/**
+	 * User email
+	 */
+	public String email = null;
 
     /**
      * Save token into specified file
@@ -124,6 +131,9 @@ public class VKAccessToken {
         if (httpsRequired) {
             params.put(HTTPS_REQUIRED, "1");
         }
+		if (email != null) {
+			params.put(EMAIL, email);
+		}
 
         return VKStringJoiner.joinParams(params);
     }
@@ -157,6 +167,7 @@ public class VKAccessToken {
             token.expiresIn = Integer.parseInt(parameters.get(EXPIRES_IN));
             token.userId = parameters.get(USER_ID);
             token.secret = parameters.get(SECRET);
+			token.email = parameters.get(EMAIL);
             token.httpsRequired = false;
 
             if (parameters.containsKey(HTTPS_REQUIRED)) {
