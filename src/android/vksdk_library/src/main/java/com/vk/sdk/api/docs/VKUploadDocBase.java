@@ -19,12 +19,36 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-package com.vk.sdk;
+package com.vk.sdk.api.docs;
+
+import com.vk.sdk.api.VKUploadBase;
+import com.vk.sdk.api.httpClient.VKHttpClient;
+import com.vk.sdk.api.httpClient.VKJsonOperation;
+
+import java.io.File;
 
 /**
- * Contains SDK versions constants
+ * Provides common part of document upload process
  */
-public class VKSdkVersion {
-    public static final String SDK_VERSION = "1.5.6";
-    static final String DEFAULT_API_VERSION = "5.21";
+public abstract class VKUploadDocBase extends VKUploadBase {
+    /**
+     * ID of group to upload
+     */
+    protected long mGroupId;
+    /**
+     * Document to upload
+     */
+    protected File mDoc;
+
+    /**
+     * Creates a VKUploadDocBase empty instance.
+     */
+    public VKUploadDocBase() {
+        super();
+    }
+
+    @Override
+    protected VKJsonOperation getUploadOperation(String uploadUrl) {
+        return new VKJsonOperation(VKHttpClient.docUploadRequest(uploadUrl, mDoc));
+    }
 }

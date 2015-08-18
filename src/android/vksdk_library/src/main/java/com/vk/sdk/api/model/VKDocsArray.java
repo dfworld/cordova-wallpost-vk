@@ -19,12 +19,18 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-package com.vk.sdk;
+package com.vk.sdk.api.model;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
- * Contains SDK versions constants
- */
-public class VKSdkVersion {
-    public static final String SDK_VERSION = "1.5.6";
-    static final String DEFAULT_API_VERSION = "5.21";
+ * Array of API docs objects
+*/
+public class VKDocsArray extends VKList<VKApiDocument> {
+    @Override
+    public VKApiModel parse(JSONObject response) throws JSONException {
+        fill(response, VKApiDocument.class);
+        return this;
+    }
 }

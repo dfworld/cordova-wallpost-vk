@@ -1,5 +1,5 @@
 //
-//  Copyright (c) 2014 VK.com
+//  Copyright (c) 2015 VK.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
@@ -21,10 +21,9 @@
 
 package com.vk.sdk;
 
-/**
- * Contains SDK versions constants
- */
-public class VKSdkVersion {
-    public static final String SDK_VERSION = "1.5.6";
-    static final String DEFAULT_API_VERSION = "5.21";
+import com.vk.sdk.api.VKError;
+
+public interface VKCallback<RESULT> {
+    void onResult(RESULT res);
+    void onError(VKError error);
 }

@@ -21,13 +21,17 @@
 
 package com.vk.sdk.api;
 
+import com.vk.sdk.api.methods.VKApiAudio;
+import com.vk.sdk.api.methods.VKApiDocs;
 import com.vk.sdk.api.methods.VKApiFriends;
 import com.vk.sdk.api.methods.VKApiGroups;
+import com.vk.sdk.api.methods.VKApiMessages;
 import com.vk.sdk.api.methods.VKApiPhotos;
 import com.vk.sdk.api.methods.VKApiUsers;
 import com.vk.sdk.api.methods.VKApiWall;
 import com.vk.sdk.api.photo.VKUploadAlbumPhotoRequest;
 import com.vk.sdk.api.photo.VKUploadImage;
+import com.vk.sdk.api.photo.VKUploadMessagesPhotoRequest;
 import com.vk.sdk.api.photo.VKUploadWallPhotoRequest;
 
 import java.io.File;
@@ -50,7 +54,13 @@ public class VKApi {
     public static VKApiFriends friends() {
         return new VKApiFriends();
     }
-
+    /**
+     * https://vk.com/dev/messages
+     * Returns object for preparing requests to messages part of API
+     */
+    public static VKApiMessages messages() {
+        return new VKApiMessages();
+    }
     /**
      * https://vk.com/dev/wall
      * Returns object for preparing requests to wall part of API
@@ -65,6 +75,22 @@ public class VKApi {
      */
     public static VKApiPhotos photos() {
         return new VKApiPhotos();
+    }
+
+    /**
+     * https://vk.com/dev/docs
+     * Returns object for preparing requests to docs part of API
+     */
+    public static VKApiDocs docs() {
+        return new VKApiDocs();
+    }
+
+    /**
+     * https://vk.com/dev/audio
+     * Returns object for preparing requests to audio part of API
+     */
+    public static VKApiAudio audio() {
+        return new VKApiAudio();
     }
 
     /**
@@ -112,5 +138,22 @@ public class VKApi {
      */
     public static VKRequest uploadAlbumPhotoRequest(VKUploadImage image, long albumId, int groupId) {
         return new VKUploadAlbumPhotoRequest(image, albumId, groupId);
+    }
+	
+	/**
+     * Upload a specified file to VK servers for use as an attachment to a message
+     * @param image Image file to upload. Must have extension jpg or png
+     * @return Prepared vk request for photo upload
+     */
+	public static VKRequest uploadMessagesPhotoRequest(File image) {
+        return new VKUploadMessagesPhotoRequest(image);
+    }
+	/**
+     * Upload a specified file to VK servers for use as an attachment to a message
+     * @param image Special image object to upload
+     * @return Prepared vk request for photo upload
+     */
+    public static VKRequest uploadMessagesPhotoRequest(VKUploadImage image) {
+        return new VKUploadMessagesPhotoRequest(image);
     }
 }
