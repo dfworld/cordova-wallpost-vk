@@ -21,7 +21,8 @@ dependencies {
     javadoc 'org.apache.httpcomponents:httpclient:4.0.1'
     javadoc 'org.json:json:20080701'
     javadoc 'com.google.android:annotations:4.1.1.4@jar'
-    compile 'com.android.support:support-v4:20.0.0'
+    compile 'com.android.support:support-v4:23.0.0'
+    compile 'com.android.support:support-annotations:23.0.0'
 }
 
 buildscript {
